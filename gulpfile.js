@@ -5,6 +5,7 @@ var gulp = require('gulp');
 var gutil = require('gulp-util');
 var coffee = require('gulp-coffee');
 var concat = require('gulp-concat');
+var browserify = require('gulp-browserify');
 
 // my-log - something we name
 //gulp.task('my-log', function(){
@@ -30,9 +31,17 @@ gulp.task('coffee-test', function(){
 
 
 
-// Task to concatonate JS files
+// Task to concatenated JS files
 gulp.task('concat-js', function(){
 	gulp.src(jsSources) // specify source
 		.pipe(concat('script.js')) // do some command
+		.pipe(gulp.dest('builds/development/js')); // specify destination
+});
+
+// Task to concatenated JS files - WITH BROWSERIFY
+gulp.task('concat-js-2', function(){
+	gulp.src(jsSources) // specify source
+		.pipe(concat('script.js')) // do some command
+		.pipe(browserify())// require libraries that we need (jQuery, etc.)
 		.pipe(gulp.dest('builds/development/js')); // specify destination
 });
