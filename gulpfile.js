@@ -7,7 +7,3 @@ gulp.task('my-log', function(){
 	gutil.log('Workflows are awesome!');
 
 });
-
-
-
-//ccc

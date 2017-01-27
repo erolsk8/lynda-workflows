@@ -6,5 +6,9 @@
     "type": "git",
     "url": "https://github.com/erolsk8/lynda-workflows.git"
   },
-  "author": "Ray Villalobos"
+  "author": "Ray Villalobos",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.8"
+  }
 }
