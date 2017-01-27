@@ -6,6 +6,7 @@ var gutil = require('gulp-util');
 var coffee = require('gulp-coffee');
 var concat = require('gulp-concat');
 var browserify = require('gulp-browserify');
+var compass = require('gulp-compass');
 
 // my-log - something we name
 //gulp.task('my-log', function(){
@@ -20,6 +21,7 @@ var jsSources = [
 	'components/scripts/tagline.js',
 	'components/scripts/template.js'
 ];
+var sassSources = ['components/sass/style.scss'];
 
 gulp.task('coffee-test', function(){
 	gulp.src(coffeeSources)
@@ -45,3 +47,22 @@ gulp.task('concat-js-2', function(){
 		.pipe(browserify())// require libraries that we need (jQuery, etc.)
 		.pipe(gulp.dest('builds/development/js')); // specify destination
 });
+
+
+
+
+// Task for Compass / SASS
+gulp.task('my-compass', function(){
+	gulp.src(sassSources) // specify source
+		.pipe(compass({
+			sass: 'components/sass',
+			images: 'builds/development/images',
+			style: 'expanded', // compressed - for production
+			line_comments: true
+		})) // do some command
+		.on('error', gutil.log)
+		.pipe(gulp.dest('builds/development/css')); // specify destination
+});
+
+
+
