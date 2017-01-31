@@ -9,22 +9,51 @@ var browserify = require('gulp-browserify');
 var compass = require('gulp-compass');
 var connect = require('gulp-connect');
 
+var env,
+	coffeeSources,
+	jsSources,
+	sassSources,
+	htmlSources,
+	jsonSources,
+	outputDir,
+	sassStyle;
+
+
+// Set node environment variable, if it's not set (in terminal or somewhere) it will be 'development'
+// It can be changed in terminal, and "gulp" part is to actually run gulp (with 'default' task):
+// $ NODE_ENV=production gulp
+env = process.env.NODE_ENV || 'development';
+
+
+// Modify how output is used based on "env" variable
+if(env === 'development') {
+	outputDir = 'builds/development/';
+	sassStyle = 'expanded';
+} else {
+	outputDir = 'builds/production/';
+	sassStyle = 'compressed';
+}
+
+
 // my-log - something we name
 //gulp.task('my-log', function(){
 //	gutil.log('Workflows are awesome!');
 //});
 
-//var coffeeSources = ['components/coffee/*.coffee']; // include all
-var coffeeSources = ['components/coffee/tagline.coffee'];
-var jsSources = [
+//coffeeSources = ['components/coffee/*.coffee']; // include all
+coffeeSources = ['components/coffee/tagline.coffee'];
+jsSources = [
 	'components/scripts/rclick.js',
 	'components/scripts/pixgrid.js',
 	'components/scripts/tagline.js',
 	'components/scripts/template.js'
 ];
-var sassSources = ['components/sass/style.scss'];
-var htmlSources = ['builds/development/*.html'];
-var jsonSources = ['builds/development/js/*.json'];
+sassSources = ['components/sass/style.scss'];
+htmlSources = [outputDir + '*.html'];
+jsonSources = [outputDir + 'js/*.json'];
+
+
+
 
 gulp.task('coffee-test', function(){
 	gulp.src(coffeeSources)
@@ -41,7 +70,7 @@ gulp.task('coffee-test', function(){
 //gulp.task('concat-js', function(){
 //	gulp.src(jsSources) // specify source
 //		.pipe(concat('script.js')) // do some command
-//		.pipe(gulp.dest('builds/development/js')); // specify destination
+//		.pipe(gulp.dest(outputDir + 'js')); // specify destination
 //});
 
 // Task to concatenated JS files - WITH BROWSERIFY
@@ -49,7 +78,7 @@ gulp.task('concat-js-browserify', function(){
 	gulp.src(jsSources) // specify source
 		.pipe(concat('script.js')) // do some command
 		.pipe(browserify())// require libraries that we need (jQuery, etc.)
-		.pipe(gulp.dest('builds/development/js')) // specify destination
+		.pipe(gulp.dest(outputDir + 'js')) // specify destination
 		.pipe(connect.reload()); // reload page when JS files are changed (when script.js is updated)
 });
 
@@ -58,7 +87,7 @@ gulp.task('concat-js-browserify', function(){
 //	gulp.src(jsSources) // specify source
 //		.pipe(concat('script.js')) // do some command
 //		.pipe(browserify())// require libraries that we need (jQuery, etc.)
-//		.pipe(gulp.dest('builds/development/js')); // specify destination
+//		.pipe(gulp.dest(outputDir + 'js')); // specify destination
 //});
 
 
@@ -69,12 +98,13 @@ gulp.task('my-compass', function(){
 	gulp.src(sassSources) // specify source
 		.pipe(compass({
 			sass: 'components/sass',
-			images: 'builds/development/images',
-			style: 'expanded', // compressed - for production
+			images: outputDir + 'images',
+			//style: 'expanded', // compressed - for production
+			style: sassStyle,
 			line_comments: true
 		})) // do some command
 		.on('error', gutil.log)
-		.pipe(gulp.dest('builds/development/css')) // specify destination
+		.pipe(gulp.dest(outputDir + 'css')) // specify destination
 		.pipe(connect.reload()); // reload page when SCSS files are compiled with compass (when style.css is updated)
 });
 
@@ -123,7 +153,7 @@ gulp.task('my-watch', function(){
 // Task to start up the server using 'gulp-connect' plugin, which would also AUTO-RELOAD page when files are changed
 gulp.task('my-connect', function(){
 	connect.server({
-		root: 'builds/development/',
+		root: outputDir,
 		livereload: true
 	});
 });
