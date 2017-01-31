@@ -2,12 +2,14 @@
 // so set input, set task and set destination
 
 var gulp = require('gulp');
-var gutil = require('gulp-util');
-var coffee = require('gulp-coffee');
-var concat = require('gulp-concat');
-var browserify = require('gulp-browserify');
-var compass = require('gulp-compass');
-var connect = require('gulp-connect');
+var gulpUtil = require('gulp-util'); // To show messages with gulpUtil.log
+var coffee = require('gulp-coffee'); // To compile .coffee files to .js files
+var concat = require('gulp-concat'); // To compile multiple .js files to single .js file
+var browserify = require('gulp-browserify'); // To avoid "'required' is not defined" error and make it work in browsers :) and actually to load dependencies (jQuery and stuff)
+var compass = require('gulp-compass'); // To compile .scss files to .css files
+var connect = require('gulp-connect'); // To create server (and access through http://localhost:8080 avoiding some "not on same server address" errors) and to enable auto-reload in browser
+var gulpIf = require('gulp-if'); // To add gulp "if" statements, i.e.  .pipe(gulpIf(condition, uglify()))
+var uglify = require('gulp-uglify'); // Plugin and JS library to control how JS code will be minified
 
 var env,
 	coffeeSources,
@@ -37,7 +39,7 @@ if(env === 'development') {
 
 // my-log - something we name
 //gulp.task('my-log', function(){
-//	gutil.log('Workflows are awesome!');
+//	gulpUtil.log('Workflows are awesome!');
 //});
 
 //coffeeSources = ['components/coffee/*.coffee']; // include all
@@ -58,7 +60,7 @@ jsonSources = [outputDir + 'js/*.json'];
 gulp.task('coffee-test', function(){
 	gulp.src(coffeeSources)
 		.pipe(coffee({bare: true})
-			.on('error', gutil.log))
+			.on('error', gulpUtil.log))
 		.pipe(gulp.dest('components/scripts'));
 });
 
@@ -69,15 +71,19 @@ gulp.task('coffee-test', function(){
 // this doesn't really work, because it doesn't go through browserify
 //gulp.task('concat-js', function(){
 //	gulp.src(jsSources) // specify source
-//		.pipe(concat('script.js')) // do some command
+//		.pipe(concat('script.js')) // do/execute some command
 //		.pipe(gulp.dest(outputDir + 'js')); // specify destination
 //});
 
 // Task to concatenated JS files - WITH BROWSERIFY
 gulp.task('concat-js-browserify', function(){
+
+	// Whenever we concatenate JS files...
+
 	gulp.src(jsSources) // specify source
-		.pipe(concat('script.js')) // do some command
+		.pipe(concat('script.js')) // do/execute some command
 		.pipe(browserify())// require libraries that we need (jQuery, etc.)
+		.pipe(gulpIf(env === 'production', uglify()))// pipe to gulpIf, in order to execute uglify() only when 'gulp-if' condition is true
 		.pipe(gulp.dest(outputDir + 'js')) // specify destination
 		.pipe(connect.reload()); // reload page when JS files are changed (when script.js is updated)
 });
@@ -103,7 +109,7 @@ gulp.task('my-compass', function(){
 			style: sassStyle,
 			line_comments: true
 		})) // do some command
-		.on('error', gutil.log)
+		.on('error', gulpUtil.log)
 		.pipe(gulp.dest(outputDir + 'css')) // specify destination
 		.pipe(connect.reload()); // reload page when SCSS files are compiled with compass (when style.css is updated)
 });
