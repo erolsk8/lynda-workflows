@@ -23,6 +23,8 @@ var jsSources = [
 	'components/scripts/template.js'
 ];
 var sassSources = ['components/sass/style.scss'];
+var htmlSources = ['builds/development/*.html'];
+var jsonSources = ['builds/development/js/*.json'];
 
 gulp.task('coffee-test', function(){
 	gulp.src(coffeeSources)
@@ -105,6 +107,12 @@ gulp.task('my-watch', function(){
 
 	// SASS changes
 	gulp.watch('components/sass/*.scss', ['my-compass']);
+
+	// HTML changes
+	gulp.watch(htmlSources, ['html-change']);
+
+	// JSON changes
+	gulp.watch(jsonSources, ['json-change']);
 });
 
 
@@ -122,7 +130,22 @@ gulp.task('my-connect', function(){
 
 
 
+// Reload page when HTML is changed
+gulp.task('html-change', function(){
+	gulp.src(htmlSources)
+		.pipe(connect.reload());
+});
+
+
+
+// Reload page when JSON files are changed (.../builds/development/js/data.json)
+gulp.task('json-change', function(){
+	gulp.src(jsonSources)
+		.pipe(connect.reload());
+});
+
+
 
 
 // When task is named 'default', that one will be called when command "gulp" is called without any task name or anything
-gulp.task('default', ['coffee-test', 'concat-js-browserify', 'my-compass', 'my-connect', 'my-watch']);
+gulp.task('default', ['html-change', 'json-change', 'coffee-test', 'concat-js-browserify', 'my-compass', 'my-connect', 'my-watch']);
