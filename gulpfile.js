@@ -41,20 +41,20 @@ gulp.task('concat-js', function(){
 });
 
 // Task to concatenated JS files - WITH BROWSERIFY
-gulp.task('concat-js-2', function(){
+gulp.task('concat-js-browserify', function(){
 	gulp.src(jsSources) // specify source
 		.pipe(concat('script.js')) // do some command
 		.pipe(browserify())// require libraries that we need (jQuery, etc.)
 		.pipe(gulp.dest('builds/development/js')); // specify destination
 });
 
-// Task to concatenated JS files - WITH COFFEE AS DEPENDENCY (to run 'coffee-test' before 'concat-js-2')
-gulp.task('concat-js-3', ['coffee-test'], function(){
-	gulp.src(jsSources) // specify source
-		.pipe(concat('script.js')) // do some command
-		.pipe(browserify())// require libraries that we need (jQuery, etc.)
-		.pipe(gulp.dest('builds/development/js')); // specify destination
-});
+// Task to concatenated JS files - WITH COFFEE AS DEPENDENCY (to run 'coffee-test' before 'concat-js-3')
+//gulp.task('concat-js-3', ['coffee-test'], function(){
+//	gulp.src(jsSources) // specify source
+//		.pipe(concat('script.js')) // do some command
+//		.pipe(browserify())// require libraries that we need (jQuery, etc.)
+//		.pipe(gulp.dest('builds/development/js')); // specify destination
+//});
 
 
 
@@ -73,9 +73,34 @@ gulp.task('my-compass', function(){
 });
 
 
+
+
+
+
+
 gulp.task('all', ['coffee-test', 'concat-js', 'my-compass']);
 
 // When it's named 'default', that one will be called when command "gulp" is called without any task name or anything
 gulp.task('default', ['coffee-test', 'concat-js', 'my-compass']);
 
 
+
+
+
+
+
+// Monitor for changes and run automatically
+gulp.task('my-watch', function(){
+	// It doesn't work with only this line, because it didn't went through "browserify", which is done with 'concat-js-browserify'
+	// - When: something in "coffeeSources" (files (tagline.coffee for example)) changes,
+	// - Run: 'coffee-test'
+	gulp.watch(coffeeSources, ['coffee-test']);
+
+	// - When: jsSources files are changed (caused by changing tagline.coffee for example and then previous line changes JS files),
+	// - Run: 'concat-js-browserify'
+	gulp.watch(jsSources, ['concat-js-browserify']);
+
+
+	// SASS changes
+	gulp.watch('components/sass/*.scss', ['my-compass']);
+});
