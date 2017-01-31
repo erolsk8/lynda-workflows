@@ -48,6 +48,14 @@ gulp.task('concat-js-2', function(){
 		.pipe(gulp.dest('builds/development/js')); // specify destination
 });
 
+// Task to concatenated JS files - WITH COFFEE AS DEPENDENCY (to run 'coffee-test' before 'concat-js-2')
+gulp.task('concat-js-3', ['coffee-test'], function(){
+	gulp.src(jsSources) // specify source
+		.pipe(concat('script.js')) // do some command
+		.pipe(browserify())// require libraries that we need (jQuery, etc.)
+		.pipe(gulp.dest('builds/development/js')); // specify destination
+});
+
 
 
 
@@ -64,5 +72,10 @@ gulp.task('my-compass', function(){
 		.pipe(gulp.dest('builds/development/css')); // specify destination
 });
 
+
+gulp.task('all', ['coffee-test', 'concat-js', 'my-compass']);
+
+// When it's named 'default', that one will be called when command "gulp" is called without any task name or anything
+gulp.task('default', ['coffee-test', 'concat-js', 'my-compass']);
 
 
