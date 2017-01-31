@@ -7,6 +7,7 @@ var coffee = require('gulp-coffee');
 var concat = require('gulp-concat');
 var browserify = require('gulp-browserify');
 var compass = require('gulp-compass');
+var connect = require('gulp-connect');
 
 // my-log - something we name
 //gulp.task('my-log', function(){
@@ -34,18 +35,20 @@ gulp.task('coffee-test', function(){
 
 
 // Task to concatenated JS files
-gulp.task('concat-js', function(){
-	gulp.src(jsSources) // specify source
-		.pipe(concat('script.js')) // do some command
-		.pipe(gulp.dest('builds/development/js')); // specify destination
-});
+// this doesn't really work, because it doesn't go through browserify
+//gulp.task('concat-js', function(){
+//	gulp.src(jsSources) // specify source
+//		.pipe(concat('script.js')) // do some command
+//		.pipe(gulp.dest('builds/development/js')); // specify destination
+//});
 
 // Task to concatenated JS files - WITH BROWSERIFY
 gulp.task('concat-js-browserify', function(){
 	gulp.src(jsSources) // specify source
 		.pipe(concat('script.js')) // do some command
 		.pipe(browserify())// require libraries that we need (jQuery, etc.)
-		.pipe(gulp.dest('builds/development/js')); // specify destination
+		.pipe(gulp.dest('builds/development/js')) // specify destination
+		.pipe(connect.reload()); // reload page when JS files are changed (when script.js is updated)
 });
 
 // Task to concatenated JS files - WITH COFFEE AS DEPENDENCY (to run 'coffee-test' before 'concat-js-3')
@@ -69,7 +72,8 @@ gulp.task('my-compass', function(){
 			line_comments: true
 		})) // do some command
 		.on('error', gutil.log)
-		.pipe(gulp.dest('builds/development/css')); // specify destination
+		.pipe(gulp.dest('builds/development/css')) // specify destination
+		.pipe(connect.reload()); // reload page when SCSS files are compiled with compass (when style.css is updated)
 });
 
 
@@ -77,11 +81,9 @@ gulp.task('my-compass', function(){
 
 
 
+// New task called 'all', which would run all tasks passed in second parameter
+gulp.task('all', ['coffee-test', 'concat-js-browserify', 'my-compass']);
 
-gulp.task('all', ['coffee-test', 'concat-js', 'my-compass']);
-
-// When it's named 'default', that one will be called when command "gulp" is called without any task name or anything
-gulp.task('default', ['coffee-test', 'concat-js', 'my-compass']);
 
 
 
@@ -104,3 +106,23 @@ gulp.task('my-watch', function(){
 	// SASS changes
 	gulp.watch('components/sass/*.scss', ['my-compass']);
 });
+
+
+
+
+
+
+// Task to start up the server using 'gulp-connect' plugin, which would also AUTO-RELOAD page when files are changed
+gulp.task('my-connect', function(){
+	connect.server({
+		root: 'builds/development/',
+		livereload: true
+	});
+});
+
+
+
+
+
+// When task is named 'default', that one will be called when command "gulp" is called without any task name or anything
+gulp.task('default', ['coffee-test', 'concat-js-browserify', 'my-compass', 'my-connect', 'my-watch']);
