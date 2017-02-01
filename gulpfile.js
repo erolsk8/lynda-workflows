@@ -10,6 +10,7 @@ var compass = require('gulp-compass'); // To compile .scss files to .css files
 var connect = require('gulp-connect'); // To create server (and access through http://localhost:8080 avoiding some "not on same server address" errors) and to enable auto-reload in browser
 var gulpIf = require('gulp-if'); // To add gulp "if" statements, i.e.  .pipe(gulpIf(condition, uglify()))
 var uglify = require('gulp-uglify'); // Plugin and JS library to control how JS code will be minified
+var minifyHtml = require('gulp-minify-html'); // Plugin and JS library to control how JS code will be minified
 
 var env,
 	coffeeSources,
@@ -145,7 +146,10 @@ gulp.task('my-watch', function(){
 	gulp.watch('components/sass/*.scss', ['my-compass']);
 
 	// HTML changes
-	gulp.watch(htmlSources, ['html-change']);
+	//gulp.watch(htmlSources, ['html-change']);
+
+	// Added later (minify HTML)
+	gulp.watch('builds/development/*.html', ['html-change']);
 
 	// JSON changes
 	gulp.watch(jsonSources, ['json-change']);
@@ -168,7 +172,13 @@ gulp.task('my-connect', function(){
 
 // Reload page when HTML is changed
 gulp.task('html-change', function(){
-	gulp.src(htmlSources)
+	//gulp.src(htmlSources)
+	gulp.src('builds/development/*.html') // Added later (minify HTML)
+
+		// Added later to minify HTML
+		.pipe(gulpIf(env === 'production', minifyHtml()))
+		.pipe(gulpIf(env === 'production', gulp.dest(outputDir)))
+
 		.pipe(connect.reload());
 });
 
