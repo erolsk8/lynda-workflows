@@ -10,7 +10,8 @@ var compass = require('gulp-compass'); // To compile .scss files to .css files
 var connect = require('gulp-connect'); // To create server (and access through http://localhost:8080 avoiding some "not on same server address" errors) and to enable auto-reload in browser
 var gulpIf = require('gulp-if'); // To add gulp "if" statements, i.e.  .pipe(gulpIf(condition, uglify()))
 var uglify = require('gulp-uglify'); // Plugin and JS library to control how JS code will be minified
-var minifyHtml = require('gulp-minify-html'); // Plugin and JS library to control how JS code will be minified
+var minifyHtml = require('gulp-minify-html'); // Plugin for minifying HTML files
+var jsonMinify = require('gulp-jsonminify'); // Plugin for minifying JSON files
 
 var env,
 	coffeeSources,
@@ -147,12 +148,11 @@ gulp.task('my-watch', function(){
 
 	// HTML changes
 	//gulp.watch(htmlSources, ['html-change']);
-
-	// Added later (minify HTML)
-	gulp.watch('builds/development/*.html', ['html-change']);
+	gulp.watch('builds/development/*.html', ['html-change']); // Added later (minify HTML)
 
 	// JSON changes
-	gulp.watch(jsonSources, ['json-change']);
+	//gulp.watch(jsonSources, ['json-change']);
+	gulp.watch('builds/development/js/*.json', ['json-change']); // Added later (minify HTML)
 });
 
 
@@ -186,7 +186,13 @@ gulp.task('html-change', function(){
 
 // Reload page when JSON files are changed (.../builds/development/js/data.json)
 gulp.task('json-change', function(){
-	gulp.src(jsonSources)
+	//gulp.src(jsonSources)
+	gulp.src('builds/development/js/*.json') // Added later (minify JSON)
+
+		// Added later to minify JSON
+		.pipe(gulpIf(env === 'production', jsonMinify()))
+		.pipe(gulpIf(env === 'production', gulp.dest('builds/production/js')))
+
 		.pipe(connect.reload());
 });
 
