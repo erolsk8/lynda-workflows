@@ -12,6 +12,8 @@ var gulpIf = require('gulp-if'); // To add gulp "if" statements, i.e.  .pipe(gul
 var uglify = require('gulp-uglify'); // Plugin and JS library to control how JS code will be minified
 var minifyHtml = require('gulp-minify-html'); // Plugin for minifying HTML files
 var jsonMinify = require('gulp-jsonminify'); // Plugin for minifying JSON files
+var imageMin = require('gulp-imagemin'); // Plugin for compressing image files
+var pngCrush = require('imagemin-pngcrush'); // Plugin for compressing image files
 
 var env,
 	coffeeSources,
@@ -153,6 +155,10 @@ gulp.task('my-watch', function(){
 	// JSON changes
 	//gulp.watch(jsonSources, ['json-change']);
 	gulp.watch('builds/development/js/*.json', ['json-change']); // Added later (minify HTML)
+
+
+	// Compress images
+	gulp.watch('builds/development/images/**/*.*', ['images']);
 });
 
 
@@ -199,5 +205,20 @@ gulp.task('json-change', function(){
 
 
 
+// Compress image files
+gulp.task('images', function(){
+	gulp.src('builds/development/images/**/*.*')
+		.pipe(gulpIf(env === 'production', imageMin({
+			progressive: true,
+			svgoPlugins: [{ removeViewBox: false }],
+			use: [pngCrush()]
+		})))
+		.pipe(gulpIf(env === 'production', gulp.dest(outputDir + 'images')))
+		.pipe(connect.reload());
+});
+
+
+
+
 // When task is named 'default', that one will be called when command "gulp" is called without any task name or anything
-gulp.task('default', ['html-change', 'json-change', 'coffee-test', 'concat-js-browserify', 'my-compass', 'my-connect', 'my-watch']);
+gulp.task('default', ['html-change', 'json-change', 'coffee-test', 'concat-js-browserify', 'my-compass', 'images', 'my-connect', 'my-watch']);
